@@ -39,14 +39,23 @@ export class DashboardComponent implements OnInit {
     const loadingSnackbarRef = this.snackBar.open('Loading data...', '');
 
     // Retreive season
-    this.animetarr.GetSchedule(season).subscribe((seriesData) => {
-      console.debug(seriesData);
-      this.shows = seriesData;
+    this.animetarr.GetSchedule(season).subscribe({
+      next: (seriesData) => {
+        console.debug(seriesData);
+        this.shows = seriesData;
 
-      // Complete loading
-      loadingSnackbarRef.dismiss();
-      this.snackBar.open('Season loaded.', 'Dismiss', { duration: 3000 });
-      this.isLoading = false;
+        // Complete loading
+        loadingSnackbarRef.dismiss();
+        this.snackBar.open('Season loaded.', 'Dismiss', { duration: 3000 });
+        this.isLoading = false;
+      },
+      error: (err) => {
+        // Without this a failed request left the spinner up and the page blank.
+        console.error('Failed to load schedule', err);
+        loadingSnackbarRef.dismiss();
+        this.snackBar.open('Failed to load season.', 'Dismiss', { duration: 5000 });
+        this.isLoading = false;
+      },
     });
   }
 

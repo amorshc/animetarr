@@ -11,5 +11,11 @@ services:
             - SONARR_API_KEY=YOURSONARRAPIKEY
             - SONARR_QUALITY_PROFILE_ID=3
             - SONARR_BASE_PATH=/downloads/anime/
+            # --- Radarr (optional: enables anime movies) ---
+            - RADARR_API_BASE_URL=https://radarr.home.host.local/api/v3
+            - RADARR_API_KEY=YOURRADARRAPIKEY
+            - RADARR_QUALITY_PROFILE_ID=1
+            - RADARR_BASE_PATH=/movies/anime/
+            - RADARR_MINIMUM_AVAILABILITY=released
             - PASSWORD=aLittleS3curity
         image: 'kariudo/animetarr:latest'

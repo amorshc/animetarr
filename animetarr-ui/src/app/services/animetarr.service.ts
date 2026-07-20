@@ -28,4 +28,28 @@ export class AnimetarrService {
   AddByTvDbId(tvdbId: number): Observable<SonarrSeries> {
     return this.http.post<SonarrSeries>(`/series`, { tvdbId: tvdbId });
   }
+
+  // --- Radarr / movies -------------------------------------------------------
+
+  IsRadarrConfigured(): Observable<{ configured: boolean }> {
+    return this.http.get<{ configured: boolean }>(`/movies/configured`);
+  }
+
+  GetMovieSchedule(season: SelectedSeason): Observable<any[]> {
+    return this.http.get<any[]>(
+      `/movies/schedule/${season.year}/${season.season}`
+    );
+  }
+
+  GetRadarrMovieIds(): Observable<number[]> {
+    return this.http.get<number[]>(`/movies/ids`);
+  }
+
+  AddMovieByTitle(title: string): Observable<any> {
+    return this.http.post<any>(`/movies`, { title });
+  }
+
+  AddMovieByTmdbId(tmdbId: number): Observable<any> {
+    return this.http.post<any>(`/movies`, { tmdbId });
+  }
 }

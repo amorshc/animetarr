@@ -64,7 +64,8 @@ export async function PostSeries(tvdbId: number): Promise<SonarrSeries> {
   const bodyJson = JSON.stringify({
     tvdbId: tvdbId,
     title: series.title,
-    qualityProfileId: process.env.SONARR_QUALITY_PROFILE_ID,
+    // Env vars are strings; Sonarr expects a numeric qualityProfileId.
+    qualityProfileId: Number(process.env.SONARR_QUALITY_PROFILE_ID),
     titleSlug: series.titleSlug,
     seasons: series.seasons,
     images: series.images,

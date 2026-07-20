@@ -8,7 +8,7 @@ auth.post("/", async (req, res) => {
   const valid = process.env.PASSWORD == password;
   console.log(
     `${new Date(Date.now()).toLocaleString()}: Authentication ${
-      valid ? "success. " : "failed, attempted with: " + password
+      valid ? "success." : "failed."
     }`
   );
   res.json(valid);

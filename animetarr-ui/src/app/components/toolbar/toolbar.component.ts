@@ -44,7 +44,11 @@ export class ToolbarComponent implements AfterContentInit {
   }
 
   ngAfterContentInit(): void {
-    this.EmitSeasonSelected();
+    // Defer the initial emit to the next macrotask. Emitting synchronously here
+    // runs the parent's loadSchedule() inside Angular's bootstrap change-detection
+    // pass, where it silently fails -- which is why the page only populated after a
+    // manual season change. setTimeout lets that first pass finish first.
+    setTimeout(() => this.EmitSeasonSelected());
   }
 
   EmitSeasonSelected(): void {

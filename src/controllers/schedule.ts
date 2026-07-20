@@ -11,10 +11,12 @@ schedule.get("/:year/:season", async (req: Request<{ year: string; season: strin
   const season = req.params.season.toUpperCase() as Season;
 
   if (!year || !season) {
-    res.status(400);
+    // status() alone never finalizes the response; the request would hang.
+    res.status(400).json({ error: "A valid year and season are required." });
     return;
   }
 
+  try {
   // Get both TV, and ONA
   const tv = await GetSeasonMedia(year, season, Format.TV);
   const ona = await GetSeasonMedia(year, season, Format.ONA);
@@ -60,4 +62,8 @@ schedule.get("/:year/:season", async (req: Request<{ year: string; season: strin
   );
 
   res.json(series.filter((x) => x !== undefined));
+  } catch (err) {
+    console.error("Schedule lookup failed (AniList/TheTVDB):", err);
+    res.status(502).json({ error: "Upstream schedule source is unreachable." });
+  }
 });

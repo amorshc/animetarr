@@ -29,7 +29,7 @@ class TVDB {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        apikey: "8f406bec-6ddb-45e7-8f4b-e1861e10f1bb",
+        apikey: this.apiKey,
         // TODO: If "pin" is included here it can support subscription users.
       }),
     });
