@@ -112,10 +112,10 @@ class TVDB {
 }
 
 const tvdbkey = process.env.TVDB_API_KEY;
-if (!tvdbkey) {
-  throw new Error("TVDB_API_KEY is a required environment variable.");
-}
-export const tvdb = new TVDB(tvdbkey);
+// TheTVDB is now an OPTIONAL fallback source (see animeMapping.ts for the
+// primary, keyless ID mapping). Only treat it as available if a key is set.
+export const tvdbConfigured = Boolean(tvdbkey);
+export const tvdb = new TVDB(tvdbkey ?? "");
 
 /**
  * Look up an TVDB entry based on series title.
@@ -132,6 +132,9 @@ export async function matchSeriesTitle(
   season?: Season,
   data: object = {}
 ): Promise<SeriesData> {
+  if (!tvdbConfigured) {
+    throw new Error("TheTVDB fallback is not configured (no TVDB_API_KEY).");
+  }
   try {
     const series = await tvdb.searchSeries(title, year);
     const seriesData: SeriesData = new SeriesData({

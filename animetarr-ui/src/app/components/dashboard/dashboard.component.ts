@@ -21,6 +21,15 @@ export class DashboardComponent implements OnInit {
   selectedFormats: string[] = [];
   favoritesOnly = false;
 
+  // Sonarr add-target setup (auto-pulled from Sonarr; chosen values persist).
+  showSettings = false;
+  sonarrProfiles: { id: number; name: string }[] = [];
+  sonarrRootFolders: { path: string }[] = [];
+  selectedProfileId: number | null = localStorage.getItem('sonarrProfileId')
+    ? Number(localStorage.getItem('sonarrProfileId'))
+    : null;
+  selectedRootFolder: string = localStorage.getItem('sonarrRootFolder') ?? '';
+
   constructor(
     private snackBar: MatSnackBar,
     private animetarr: AnimetarrService,
@@ -29,6 +38,28 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.getSonarrSeriesIds();
+    this.loadSonarrConfig();
+  }
+
+  loadSonarrConfig(): void {
+    this.animetarr.GetSonarrProfiles().subscribe({
+      next: (profiles) => (this.sonarrProfiles = profiles),
+      error: (err) => console.error('Could not load Sonarr profiles', err),
+    });
+    this.animetarr.GetSonarrRootFolders().subscribe({
+      next: (folders) => (this.sonarrRootFolders = folders),
+      error: (err) => console.error('Could not load Sonarr root folders', err),
+    });
+  }
+
+  onProfileChange(): void {
+    if (this.selectedProfileId != null) {
+      localStorage.setItem('sonarrProfileId', String(this.selectedProfileId));
+    }
+  }
+
+  onRootFolderChange(): void {
+    localStorage.setItem('sonarrRootFolder', this.selectedRootFolder);
   }
 
   get matchedShows(): SeriesData[] {

@@ -25,8 +25,31 @@ export class AnimetarrService {
     return this.http.get<number[]>(`/series/ids`);
   }
 
-  AddByTvDbId(tvdbId: number): Observable<SonarrSeries> {
-    return this.http.post<SonarrSeries>(`/series`, { tvdbId: tvdbId });
+  AddByTvDbId(
+    tvdbId: number,
+    qualityProfileId?: number,
+    rootFolderPath?: string
+  ): Observable<SonarrSeries> {
+    const body: {
+      tvdbId: number;
+      qualityProfileId?: number;
+      rootFolderPath?: string;
+    } = { tvdbId };
+    if (qualityProfileId != null) {
+      body.qualityProfileId = qualityProfileId;
+    }
+    if (rootFolderPath) {
+      body.rootFolderPath = rootFolderPath;
+    }
+    return this.http.post<SonarrSeries>(`/series`, body);
+  }
+
+  GetSonarrProfiles(): Observable<{ id: number; name: string }[]> {
+    return this.http.get<{ id: number; name: string }[]>(`/series/profiles`);
+  }
+
+  GetSonarrRootFolders(): Observable<{ path: string }[]> {
+    return this.http.get<{ path: string }[]>(`/series/rootfolders`);
   }
 
   // --- Radarr / movies -------------------------------------------------------

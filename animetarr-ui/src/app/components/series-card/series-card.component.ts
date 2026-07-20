@@ -59,7 +59,15 @@ export class SeriesCardComponent {
     this.snackBar.open(`Adding "${show.title}" to Sonarr...`, '', {
       duration: 2000,
     });
-    this.animetarr.AddByTvDbId(show.tvdbId).subscribe((sonarrSeries) => {
+    const profileId = localStorage.getItem('sonarrProfileId');
+    const rootFolder = localStorage.getItem('sonarrRootFolder') || undefined;
+    this.animetarr
+      .AddByTvDbId(
+        show.tvdbId,
+        profileId ? Number(profileId) : undefined,
+        rootFolder
+      )
+      .subscribe((sonarrSeries) => {
       console.debug('Added', sonarrSeries);
       this.snackBar.open(`Added "${show.title}" to Sonarr.`, '', {
         duration: 3000,

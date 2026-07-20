@@ -1,27 +1,27 @@
-FROM trion/ng-cli:14.2.3 AS build
+# syntax=docker/dockerfile:1
 
-EXPOSE 3000
-
-ENV API_PORT=3000
-ENV TVDB_API_KEY=""
-ENV SONARR_API_BASE_URL="https://sonarr.yourserver.local/api"
-ENV SONARR_API_KEY=""
-ENV SONARR_QUALITY_PROFILE_ID=3
-ENV SONARR_BASE_PATH="/downloads/anime/"
-
-USER root
-
+# ---- Build stage: bundle the server (ncc) and compile the Angular UI --------
+# One standard Node base handles both. Angular 12's webpack needs the legacy
+# OpenSSL provider on Node 17+.
+FROM node:18-bullseye AS build
+ENV NODE_OPTIONS=--openssl-legacy-provider
 WORKDIR /build
-ADD . .
+COPY . .
+
+# 1) Server -> /build/dist  (this runs `rimraf dist` first, so it MUST come
+#    before the UI build, whose outputPath is ../dist/ui).
 RUN npm ci
 RUN npm run build
+
+# 2) Angular UI -> /build/dist/ui
 WORKDIR /build/animetarr-ui
 RUN npm ci
 RUN npm run build
 
-FROM node:20.12-alpine
-
+# ---- Runtime stage: just Node + the built dist ------------------------------
+FROM node:20-alpine
 WORKDIR /app
+ENV API_PORT=3000
 COPY --from=build /build/dist .
+EXPOSE 3000
 CMD ["node", "."]
-

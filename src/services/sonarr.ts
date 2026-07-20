@@ -42,13 +42,41 @@ export async function GetAllSeries(): Promise<SonarrSeries[]> {
   return allSeries;
 }
 
+export interface QualityProfile {
+  id: number;
+  name: string;
+}
+
+/** Quality profiles configured in Sonarr (for the setup dropdown). */
+export async function GetQualityProfiles(): Promise<QualityProfile[]> {
+  const data = await fetch(`${baseUrl}/qualityprofile`, { headers });
+  return (await data.json()) as QualityProfile[];
+}
+
+export interface RootFolder {
+  path: string;
+  freeSpace?: number;
+}
+
+/** Root folders configured in Sonarr (for the setup dropdown). */
+export async function GetRootFolders(): Promise<RootFolder[]> {
+  const data = await fetch(`${baseUrl}/rootfolder`, { headers });
+  return (await data.json()) as RootFolder[];
+}
+
 /**
  * Add a series to Sonarr.
  *
  * @param tvdbId The TVDB ID of the series to add.
+ * @param opts Optional quality profile / root folder chosen in the UI. When
+ *             omitted, the SONARR_QUALITY_PROFILE_ID / SONARR_BASE_PATH env
+ *             values are used as defaults.
  * @returns Added series.
  */
-export async function PostSeries(tvdbId: number): Promise<SonarrSeries> {
+export async function PostSeries(
+  tvdbId: number,
+  opts?: { qualityProfileId?: number; rootFolderPath?: string }
+): Promise<SonarrSeries> {
   // Use Sonarr to lookup the series for TVDB, since we need its properties.
   const tvdbSeriesResponse = await fetch(
     `${baseUrl}/series/lookup?term=tvdb:${tvdbId}`,
@@ -64,12 +92,14 @@ export async function PostSeries(tvdbId: number): Promise<SonarrSeries> {
   const bodyJson = JSON.stringify({
     tvdbId: tvdbId,
     title: series.title,
+    // UI selection wins; otherwise fall back to the env default.
     // Env vars are strings; Sonarr expects a numeric qualityProfileId.
-    qualityProfileId: Number(process.env.SONARR_QUALITY_PROFILE_ID),
+    qualityProfileId:
+      opts?.qualityProfileId ?? Number(process.env.SONARR_QUALITY_PROFILE_ID),
     titleSlug: series.titleSlug,
     seasons: series.seasons,
     images: series.images,
-    rootFolderPath: process.env.SONARR_BASE_PATH,
+    rootFolderPath: opts?.rootFolderPath ?? process.env.SONARR_BASE_PATH,
     seasonFolder: true,
     monitored: true,
     seriesType: "anime",

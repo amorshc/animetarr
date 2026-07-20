@@ -1,5 +1,27 @@
 <app-toolbar (onSeasonSelected)="loadSchedule($event)"></app-toolbar>
 
+<div class="settings-bar" *ngIf="!isLoading">
+  <button mat-stroked-button (click)="showSettings = !showSettings"
+    matTooltip="Where new series are added in Sonarr">
+    <mat-icon>settings</mat-icon> Setup
+  </button>
+  <ng-container *ngIf="showSettings">
+    <mat-form-field appearance="outline" class="setup-select">
+      <mat-label>Quality profile</mat-label>
+      <mat-select [(ngModel)]="selectedProfileId" (selectionChange)="onProfileChange()">
+        <mat-option *ngFor="let p of sonarrProfiles" [value]="p.id">{{ p.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="setup-select">
+      <mat-label>Root folder</mat-label>
+      <mat-select [(ngModel)]="selectedRootFolder" (selectionChange)="onRootFolderChange()">
+        <mat-option *ngFor="let r of sonarrRootFolders" [value]="r.path">{{ r.path }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <span class="setup-hint">New adds use these; leave blank to use server defaults.</span>
+  </ng-container>
+</div>
+
 <div class="filter-bar" *ngIf="!isLoading && shows.length">
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Search</mat-label>
