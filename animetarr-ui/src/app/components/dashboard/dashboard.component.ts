@@ -13,6 +13,13 @@ export class DashboardComponent implements OnInit {
   shows: SeriesData[] = []; // mockData;
   existingSonarrSeriesIds: number[] = [];
   mismatches: string[] = JSON.parse(localStorage.getItem('mismatches') ?? '[]');
+  favorites: number[] = JSON.parse(localStorage.getItem('favorites') ?? '[]');
+
+  // Client-side filters applied over the currently loaded season.
+  searchText = '';
+  selectedGenres: string[] = [];
+  selectedFormats: string[] = [];
+  favoritesOnly = false;
 
   constructor(
     private snackBar: MatSnackBar,
@@ -25,11 +32,73 @@ export class DashboardComponent implements OnInit {
   }
 
   get matchedShows(): SeriesData[] {
-    return this.shows.filter((s) => !this.isMismatched(s));
+    return this.shows.filter((s) => !this.isMismatched(s) && this.passesFilters(s));
   }
 
   get mismatchedShows(): SeriesData[] {
-    return this.shows.filter((s) => this.isMismatched(s));
+    return this.shows.filter((s) => this.isMismatched(s) && this.passesFilters(s));
+  }
+
+  // Distinct genres present in the loaded season (populates the genre filter).
+  get availableGenres(): string[] {
+    const genres = new Set<string>();
+    this.shows.forEach((s) => (s.tags ?? []).forEach((t) => genres.add(t)));
+    return Array.from(genres).sort();
+  }
+
+  // Distinct AniList formats present (TV, ONA, ...) for the type filter.
+  get availableFormats(): string[] {
+    const formats = new Set<string>();
+    this.shows.forEach((s) => {
+      const format = s.data?.format;
+      if (format) {
+        formats.add(format);
+      }
+    });
+    return Array.from(formats).sort();
+  }
+
+  get hasActiveFilters(): boolean {
+    return (
+      this.searchText.trim().length > 0 ||
+      this.selectedGenres.length > 0 ||
+      this.selectedFormats.length > 0 ||
+      this.favoritesOnly
+    );
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.selectedGenres = [];
+    this.selectedFormats = [];
+    this.favoritesOnly = false;
+  }
+
+  // A show is shown only if it passes every active filter.
+  private passesFilters(show: SeriesData): boolean {
+    if (this.searchText.trim()) {
+      const query = this.searchText.trim().toLowerCase();
+      const haystack = `${show.title} ${show.originalTitle}`.toLowerCase();
+      if (!haystack.includes(query)) {
+        return false;
+      }
+    }
+    if (this.selectedGenres.length) {
+      const tags = show.tags ?? [];
+      if (!this.selectedGenres.some((g) => tags.includes(g))) {
+        return false;
+      }
+    }
+    if (this.selectedFormats.length) {
+      const format = show.data?.format;
+      if (!format || !this.selectedFormats.includes(format)) {
+        return false;
+      }
+    }
+    if (this.favoritesOnly && !this.favorites.includes(show.tvdbId)) {
+      return false;
+    }
+    return true;
   }
 
   loadSchedule(season: SelectedSeason): void {

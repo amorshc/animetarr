@@ -42,6 +42,10 @@
   </mat-card-content>
   <mat-card-actions>
     <span class="left-buttons">
+      <button mat-icon-button (click)="toggleFavorite(series)"
+        matTooltip="{{ isFavorite(series) ? 'Remove from favorites' : 'Add to favorites' }}">
+        <mat-icon>{{ isFavorite(series) ? 'star' : 'star_border' }}</mat-icon>
+      </button>
       <button mat-icon-button (click)="showVideo(series)" matTooltip="View preview videos">
         <mat-icon>video_library</mat-icon>
       </button>

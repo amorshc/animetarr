@@ -1,10 +1,43 @@
 <app-toolbar (onSeasonSelected)="loadSchedule($event)"></app-toolbar>
 
+<div class="filter-bar" *ngIf="!isLoading && shows.length">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search</mat-label>
+    <input matInput [(ngModel)]="searchText" placeholder="Filter by title" />
+    <button mat-icon-button matSuffix *ngIf="searchText" (click)="searchText = ''"
+      matTooltip="Clear search">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-select">
+    <mat-label>Genres</mat-label>
+    <mat-select [(ngModel)]="selectedGenres" multiple>
+      <mat-option *ngFor="let genre of availableGenres" [value]="genre">{{ genre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-select">
+    <mat-label>Type</mat-label>
+    <mat-select [(ngModel)]="selectedFormats" multiple>
+      <mat-option *ngFor="let format of availableFormats" [value]="format">{{ format }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-checkbox [(ngModel)]="favoritesOnly">Favorites only</mat-checkbox>
+
+  <button mat-stroked-button *ngIf="hasActiveFilters" (click)="clearFilters()"
+    matTooltip="Clear all filters">
+    <mat-icon>clear</mat-icon> Clear
+  </button>
+</div>
+
 <div class="scrollable-content">
   <div *ngIf="!isLoading" class="content">
     <div fxLayout="row wrap" fxLayoutGap="16px grid">
       <div fxFlex="33%" fxFlex.lt-xl="50%" fxFlex.lt-lg="100%" *ngFor="let show of matchedShows">
-        <app-series-card [series]="show" [existingSonarrSeriesIds]="existingSonarrSeriesIds" [mismatches]="mismatches">
+        <app-series-card [series]="show" [existingSonarrSeriesIds]="existingSonarrSeriesIds" [mismatches]="mismatches"
+          [favorites]="favorites">
         </app-series-card>
       </div>
     </div>
@@ -17,7 +50,7 @@
       <div fxLayout="row wrap" fxLayoutGap="16px grid">
         <div fxFlex="33%" fxFlex.lt-xl="50%" fxFlex.lt-lg="100%" *ngFor="let show of mismatchedShows">
           <app-series-card [series]="show" [existingSonarrSeriesIds]="existingSonarrSeriesIds" [mismatches]="mismatches"
-            [isMismatched]="true">
+            [favorites]="favorites" [isMismatched]="true">
           </app-series-card>
         </div>
       </div>

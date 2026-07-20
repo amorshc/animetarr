@@ -22,6 +22,9 @@ export class SeriesCardComponent {
   @Input()
   isMismatched = false;
 
+  @Input()
+  favorites: number[] = [];
+
   constructor(
     private youtube: YoutubeService,
     private animetarr: AnimetarrService,
@@ -64,6 +67,20 @@ export class SeriesCardComponent {
       this.existingSonarrSeriesIds.push(show.tvdbId);
       show._isLoading = false;
     });
+  }
+
+  isFavorite(show: SeriesData): boolean {
+    return this.favorites.includes(show.tvdbId);
+  }
+
+  toggleFavorite(show: SeriesData): void {
+    const index = this.favorites.indexOf(show.tvdbId);
+    if (index >= 0) {
+      this.favorites.splice(index, 1);
+    } else {
+      this.favorites.push(show.tvdbId);
+    }
+    localStorage.setItem('favorites', JSON.stringify(this.favorites));
   }
 
   markMismatch(show: SeriesData): void {

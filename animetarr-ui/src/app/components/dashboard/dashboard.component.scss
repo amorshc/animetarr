@@ -15,3 +15,14 @@
     padding: 20px 5px;
   }
 }
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 60px 0;
+
+  .search-field { flex: 1 1 220px; }
+  .filter-select { min-width: 160px; }
+}
